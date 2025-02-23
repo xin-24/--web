@@ -1,14 +1,15 @@
 package initialize
+
 //1-4/1-5
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/xin-24/go/user-web/router"
+	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/router"
 )
 
 func Routers() *gin.Engine {
-	Router := gin.Default
+	Router := gin.Default()
 
-	Apigroup := router.Group("/v1") //v1版本号
+	Apigroup := Router.Group("/v1") //v1版本号
 	router.InitUserRouter(Apigroup)
 	return Router
 }

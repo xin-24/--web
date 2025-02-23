@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/xin-24/go/user-web/initialize"
-
+	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/initialize"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +27,7 @@ func main() {
 	zap.S().Debugf("启动服务器，端口：%d", port)
 
 	if err := Router.Run(fmt.Sprintf(":%d", port)); err != nil {
-		zap.S("启动失败", err.Error())
+		zap.S().Panic("启动失败", err.Error())
 	}
 
 }
