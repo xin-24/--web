@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -11,6 +12,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/global"
+	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/global/reponse"
 	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/proto"
 )
 
@@ -32,8 +35,8 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 					"mss": "参数错误",
 				})
 			case codes.Unavailable:
-				c.JSON(http.StatusInternalServerError,gin.H{
-					"msg":"用户服务不可用",
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"msg": "用户服务不可用",
 				})
 			default:
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -47,10 +50,10 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 }
 
 func GetUserList(ctx *gin.Context) {
-	ip := "127.0.0.1"
-	port := 50051
+
 	//拨号连接grpc服务
-	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", ip, port), grpc.WithInsecure()) //指定不加密   insecure——不上锁的
+	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserSrvInfo.Host,
+		global.ServerConfig.UserSrvInfo.Port), grpc.WithInsecure()) //指定不加密   insecure——不上锁的
 	if err != nil {
 		zap.S().Errorw("[GetUserList]连接【用户服务失败】",
 			"msg", err.Error())
@@ -70,14 +73,24 @@ func GetUserList(ctx *gin.Context) {
 	//zap.S().Debug("获取用户列表")
 	result := make([]interface{}, 0)
 	for _, value := range rsp.Data {
-		data := make(map[string]interface{})
-		data["id"] = value.Id
-		data["name"] = value.NickName
-		data["birthday"] = value.BirthDay
-		data["gender"] = value.Gender
-		data["mobile"] = value.Mobile
+		// data := make(map[string]interface{})
 
-		result = append(result, data)
+		user := reponse.UserResponse{
+			Id:       value.Id,
+			NickName: value.NickName,
+			// BirthDay:time.Time(time.Unix(int64(value.BirthDay),0)).Format("2025-2-25"),//法二
+			// BirthDay:time.Time(time.Unix(int64(value.BirthDay),0)),//法一
+			BirthDay: reponse.JsonTime(time.Unix(int64(value.BirthDay), 0)), //法三
+			Gender:   value.Gender,
+			Mobile:   value.Mobile,
+		}
+		// data["id"] = value.Id
+		// data["name"] = value.NickName
+		// data["birthday"] = value.BirthDay
+		// data["gender"] = value.Gender
+		// data["mobile"] = value.Mobile
+
+		result = append(result, user)
 	}
 	ctx.JSON(http.StatusOK, result)
 }
