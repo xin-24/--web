@@ -3,6 +3,7 @@ module github.com/xin-24/go/mxshop-api/user-web
 go 1.23.3
 
 require (
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.10.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.70.0
@@ -10,7 +11,6 @@ require (
 )
 
 require (
-	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
