@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ import (
 	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/global"
 	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/global/reponse"
 	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/proto"
+	"github.com/xin-24/go/mxshop-api/user-web/mxshop-api/user-web/form"
 )
 
 func HandleGrpcErrorToHttp(err error, c *gin.Context) {
@@ -61,9 +63,13 @@ func GetUserList(ctx *gin.Context) {
 	//生成grpc的client并调用接口
 	userSrvClient := proto.NewUserClient(userConn)
 
+	pn:=ctx.DefaultQuery("pn","0")
+	pnInt,_:=strconv.Atoi(pn)
+	pSize:=ctx.DefaultQuery("psize","10")
+	pSizeInt,_:=strconv.Atoi(pSize)
 	rsp, err := userSrvClient.GetUserList(context.Background(), &proto.PageInfo{
-		Pn:    0,
-		PSize: 0,
+		Pn:    uint32(pnInt),
+		PSize: uint32(pSizeInt),
 	})
 	if err != nil {
 		zap.S().Errorw("[GetUserList] 查询 【用户列表】失败")
@@ -93,4 +99,12 @@ func GetUserList(ctx *gin.Context) {
 		result = append(result, user)
 	}
 	ctx.JSON(http.StatusOK, result)
+}
+
+func PassWordLogin(c *gin.Context){
+	PassWordLoginForm:=form.PassWordLoginForm{}
+	if err:=c.ShouldBindJSON(&PassWordLoginForm);err!=nil{
+		//如何返回错误信息
+		//ch——07？？
+	}
 }
